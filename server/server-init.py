@@ -14,9 +14,8 @@ class Server(Socket):
         self.socket.setblocking(False)
 
     # Отправка данных
-    async def send_data(self, data):
-        for user in self.users:
-            await self.main_loop.sock_sendall(user, data)
+    async def send_data(self, data, user):
+        await self.main_loop.sock_sendall(user, data)
 
     # Принимает данные
     async def listen_socket(self, listened_socket):
@@ -26,12 +25,12 @@ class Server(Socket):
         # Обработка данных
         while True:
             data = await self.main_loop.sock_recv(listened_socket, 2048)
-            print(data)
             # await self.send_data(data)
             if not data:
                 print("Client disconnected")
                 self.users.remove(listened_socket)
                 return
+            print(data)
 
     async def accept_sockets(self):
         while True:
@@ -40,9 +39,17 @@ class Server(Socket):
                 user_socket, address = await self.main_loop.sock_accept(
                     self.socket
                 )
-                print(f"User {address[0]} was connected!")
-                self.users.append(user_socket)
-                self.main_loop.create_task(self.listen_socket(user_socket))
+                a = False
+                for user in self.users:
+                    if user == user_socket:
+                        a = True
+                if not a:
+                    print(f"User {address[0]} was connected!")
+                    self.users.append(user_socket)
+                    # await self.send_data("Hello!", user)
+                    self.main_loop.create_task(
+                        self.listen_socket(user_socket)
+                    )
             except BaseException:
                 print("Something wrong happen")
                 return
