@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
+from URLScreenshot import getScreenshot
 from sqlLite.BdInit import DataBase 
 
 app = Flask(__name__)
@@ -21,17 +22,20 @@ def get_analise():
 
 
 @app.route('/api/testing', methods=['POST'])
-def trace():
+async def trace():
     request_data = request.get_json()
     url = request_data['url']
     # result = db.addURLData(request_data)
     # Обработка
-    #  socket.emit('List3', data)
+    data = getScreenshot(url)
+    print(data)
+    await socket.send(data)
+    await socket.emit('image', data)
     #print(result)
     return "ss"
 
 @socket.on('message')
-def handle_message(data):
+async def handle_message(data):
     print(data)
     print(request)
     socket.emit('List3', data)

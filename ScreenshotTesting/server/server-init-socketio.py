@@ -1,9 +1,8 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_socketio import SocketIO, emit, join_room
 from flask_cors import CORS
-#from sqlLite.BdInit import DataBase
 from URLScreenshot import getScreenshot
-import time
+# from sqlLite.BdInit import DataBase 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'development key'
@@ -11,7 +10,7 @@ socket = SocketIO(
     app, cors_allowed_origins="*", engineio_logger=True, asunc_mode='eventlet'
 )
 CORS(app)
-#db = DataBase("sites.db")
+# db = DataBase("sites.db")
 
 
 @app.route('/api/screenshots', methods=['POST'])
@@ -19,18 +18,24 @@ def get_analise():
     request_data = request.get_json()
     # db.addSiteData(request_data)
     # socket.emit({"result" : "Change has been made"})
+    url = request_data['url']
+    data = getScreenshot(url)
+    with open(data, 'rb') as f:
+        image_data = f.read()
+    socket.emit('image', {'image_data': image_data})
     return "OK"
 
 
 @app.route('/api/testing', methods=['POST'])
-async def trace():
+def trace():
     request_data = request.get_json()
     url = request_data['url']
     # result = db.addURLData(request_data)
     # Обработка
     data = getScreenshot(url)
-    await socket.send(data)
-    await socket.emit('image', data)
+    with open(data, 'rb') as f:
+        image_data = f.read()
+    socket.emit('image', {'image_data': image_data})
     #print(result)
     return "ss"
 
@@ -38,7 +43,7 @@ async def trace():
 async def handle_message(data):
     print(data)
     print(request)
-    await socket.emit('List3', data)
+    socket.emit('List3', data)
 
 
 # @socket.on('List2')
@@ -49,4 +54,4 @@ async def handle_message(data):
 
 
 if __name__ == '__main__':
-    socket.run(app, host='192.168.1.7', port='65432', debug=True)
+    socket.run(app, host='192.168.1.202', port='6543', debug=True)

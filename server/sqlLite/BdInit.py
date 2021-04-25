@@ -19,9 +19,14 @@ class DataBase():
     
     def addSiteData(self, data):
         try:
-            self.cursor.execute(
-                f"""INSERT INTO FullSites ('{data['id']}', {data['timestamp']}, '{data['status']}', '{data['url']}', '{data['title']}');"""
-            )
+            print(data['id'])
+            print(str(data['settings']['timestamp']))
+            print(data['settings']['status'])
+            print(data['url'])
+            print(data['title'])
+            print(str(data['settings']['timeOut']))
+            print("INSERT INTO FullSites (ID, TimeStamp, Status, URL, Title, Timeout) VALUES ('" + data['id'] + "', " + str(data['settings']['timestamp']) + ", '" + data['settings']['status'] + "', '" + data['url'] + "', '" + data['title'] + "', " + str(data['settings']['timeOut']) + ");")
+            self.cursor.execute("INSERT INTO FullSites (ID, TimeStamp, Status, URL, Title, Timeout) VALUES ('" + data['id'] + "', " + str(data['settings']['timestamp']) + ", '" + data['settings']['status'] + "', '", data['url'] + "', '" + data['title'] + "', " + str(data['settings']['timeOut']) + ");")
             return "OK"
         except sqlite3.Error as error:
             print("Ошибка при создании таблицы: ", error)
